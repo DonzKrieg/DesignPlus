@@ -1,3 +1,5 @@
+import 'package:designplus/pages/login_page.dart';
+import 'package:designplus/pages/onboarding_page.dart';
 import 'package:designplus/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +14,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      routes: {'/': (context) => SplashPage()},
+      routes: {
+        '/': (context) => SplashPage(),
+        '/onboarding': (context) => OnboardingPage(),
+        '/login': (context) => LoginPage(),
+      },
     );
   }
 }
