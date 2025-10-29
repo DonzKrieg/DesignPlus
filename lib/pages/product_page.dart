@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../shared/theme.dart';
-import '../widgets/bottom_nav.dart';
+import 'package:designplus/shared/theme.dart';
+import 'package:designplus/widgets/bottom_nav.dart';
 
 // = = = = = = = = = = = = = CONFIG = = = = = = = = = = = = =
 class Product {
