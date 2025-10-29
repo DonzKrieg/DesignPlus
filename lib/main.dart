@@ -1,4 +1,5 @@
-import 'package:designplus/pages/splash_page.dart';
+import '../pages/product_page.dart'; 
+// import 'package:designplus/pages/splash_page.dart'; // Splash page tidak dipanggil dulu
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,7 +13,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      routes: {'/': (context) => SplashPage()},
+      home: ProductPage(),
+      // initialRoute: '/',
+      // routes: {
+      //   '/': (context) => SplashPage(), 
+      //   '/product': (context) => ProductPage(),
+      // },
     );
   }
 }
+
