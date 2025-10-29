@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../shared/theme.dart';
+import 'package:designplus/shared/theme.dart';
 
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
