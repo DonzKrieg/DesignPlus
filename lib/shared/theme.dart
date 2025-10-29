@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 Color kPrimaryColor = Color(0xFF2236E0);
+Color kSecondaryColor = Color(0xFFBAC1F5);
 Color kPositiveColor = Color(0xFF328e6e);
 Color kNegativeColor = Color(0xFFdc2525);
 Color kBackgroundColor = Color(0xFFF5F5F5);
@@ -21,3 +22,5 @@ FontWeight regular = FontWeight.w400;
 FontWeight medium = FontWeight.w500;
 FontWeight semiBold = FontWeight.w600;
 FontWeight bold = FontWeight.w700;
+FontWeight extraBold = FontWeight.w800;
+FontWeight black = FontWeight.w900;

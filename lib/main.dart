@@ -1,5 +1,7 @@
-import '../pages/product_page.dart'; 
-// import 'package:designplus/pages/splash_page.dart'; // Splash page tidak dipanggil dulu
+// import 'package:designplus/pages/login_page.dart';
+import 'package:designplus/pages/onboarding_page.dart';
+import 'package:designplus/pages/product_page.dart';
+import 'package:designplus/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,13 +15,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ProductPage(),
-      // initialRoute: '/',
-      // routes: {
-      //   '/': (context) => SplashPage(), 
-      //   '/product': (context) => ProductPage(),
-      // },
+      routes: {
+        '/': (context) => SplashPage(),
+        '/onboarding': (context) => OnboardingPage(),
+        // '/login': (context) => LoginPage(),
+        '/product': (context) =>  ProductPage(),
+    },
     );
   }
 }
-
