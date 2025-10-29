@@ -1,5 +1,6 @@
-import 'package:designplus/pages/login_page.dart';
+// import 'package:designplus/pages/login_page.dart';
 import 'package:designplus/pages/onboarding_page.dart';
+import 'package:designplus/pages/product_page.dart';
 import 'package:designplus/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 
@@ -17,8 +18,9 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => SplashPage(),
         '/onboarding': (context) => OnboardingPage(),
-        '/login': (context) => LoginPage(),
-      },
+        // '/login': (context) => LoginPage(),
+        '/product': (context) =>  ProductPage(),
+    },
     );
   }
 }
