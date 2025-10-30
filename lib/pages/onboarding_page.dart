@@ -140,7 +140,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        "Lorem ipsum dolor sit amet consectetur adipiscing elit\nquisque faucibus ex sapien vitae pellentesque sem\nplacerat in id cursus mi.",
+                        "Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus ex sapien vitae pellentesque sem placerat in id cursus mi.",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: kGreyColor, fontSize: 12),
                       ),
