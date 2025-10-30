@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:designplus/shared/theme.dart';
-import 'package:designplus/widgets/bottom_nav.dart';
 
 // = = = = = = = = = = = = = CONFIG = = = = = = = = = = = = =
 class Product {
@@ -85,7 +84,7 @@ final List<Product> dummyProducts = [
 //  = = = = = = = = = = = = = PRODUCT PAGE WIDGET = = = = = = = = = = = = =
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
-
+  
   @override
   State<ProductPage> createState() => _ProductPageState();
 }
@@ -108,64 +107,12 @@ class _ProductPageState extends State<ProductPage> {
     _filteredProducts = List.from(dummyProducts);
   }
 
-  int _calculateCurrentIndex(BuildContext context) {
-    final String? currentRoute = ModalRoute.of(context)?.settings.name;
-    switch (currentRoute) {
-      case '/home':
-        return 0;
-      case '/product':
-        return 1;
-      case '/cart':
-        return 2;
-      case '/profile':
-        return 3;
-      default:
-        if (currentRoute == '/') {
-          return 1;
-        }
-        return 1;
-    }
-  }
-
-  // void _onItemTapped(int index) {
-  //   final String? currentRoute = ModalRoute.of(context)?.settings.name;
-
-  //   switch (index) {
-  //     case 0: // Beranda
-  //       if (currentRoute != '/home') {
-  //         Navigator.pushReplacementNamed(context, '/home');
-  //       }
-  //       break;
-  //     case 1: // Produk
-  //       if (currentRoute != '/product') {
-  //         Navigator.pushReplacementNamed(context, '/product');
-  //       }
-  //       break;
-  //     case 2: // Keranjang
-  //       if (currentRoute != '/cart') {
-  //         Navigator.pushReplacementNamed(context, '/cart');
-  //       }
-  //       break;
-  //     case 3: // Profile
-  //       if (currentRoute != '/profile') {
-  //         Navigator.pushReplacementNamed(context, '/profile');
-  //       }
-  //       break;
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
-    int currentIndex = _calculateCurrentIndex(context);
-
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: buildAppBar(),
       body: buildBody(),
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: currentIndex, 
-        // onTap: _onItemTapped, 
-      ),
     );
   }
 
@@ -191,20 +138,23 @@ class _ProductPageState extends State<ProductPage> {
 
   // = = = = = = = = = = = = = WIDGET UNTUK BODY = = = = = = = = = = = = =
   Widget buildBody() {
-    return Column(
-      children: [
-        buildFilterChips(),
-        Expanded(
-          child: _filteredProducts.isEmpty
-              ? Center(
-                  child: Text(
-                    'Produk untuk kategori ini belum tersedia',
-                    style: greyTextStyle.copyWith(fontSize: 16),
-                  ),
-                )
-              : buildProductGrid(),
-        ),
-      ],
+    return Padding(
+      padding: EdgeInsets.only(bottom: 80), // Jarak untuk Bottom Nav
+      child: Column(
+        children: [
+          buildFilterChips(),
+          Expanded(
+            child: _filteredProducts.isEmpty
+                ? Center(
+                    child: Text(
+                      'Produk untuk kategori ini belum tersedia',
+                      style: greyTextStyle.copyWith(fontSize: 16),
+                    ),
+                  )
+                : buildProductGrid(),
+          ),
+        ],
+      ),
     );
   }
 
