@@ -160,7 +160,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         CustomButton(
                           text: 'Mulai Sekarang',
                           onPressed: () {
-                            Navigator.pushNamed(context, '/login');
+                            Navigator.pushNamed(context, '/main');
                           },
                           size: Size(double.infinity, 49),
                           color: kPrimaryColor,
