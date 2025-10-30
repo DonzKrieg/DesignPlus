@@ -1,6 +1,10 @@
+import 'package:designplus/pages/cart_page.dart';
+import 'package:designplus/pages/home_page.dart';
 import 'package:designplus/pages/login_page.dart';
+import 'package:designplus/pages/main_page.dart';
 import 'package:designplus/pages/onboarding_page.dart';
 import 'package:designplus/pages/product_page.dart';
+import 'package:designplus/pages/profile_page.dart';
 import 'package:designplus/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 
@@ -19,8 +23,12 @@ class MyApp extends StatelessWidget {
         '/': (context) => SplashPage(),
         '/onboarding': (context) => OnboardingPage(),
         '/login': (context) => LoginPage(),
-        '/product': (context) =>  ProductPage(),
-    },
+        '/main': (context) => MainPage(),
+        'home': (context) => HomePage(),
+        '/product': (context) => ProductPage(),
+        '/cart': (context) => CartPage(),
+        '/profile': (context) => ProfilePage(),
+      },
     );
   }
 }
