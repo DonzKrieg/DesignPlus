@@ -1,5 +1,4 @@
 import 'package:designplus/shared/theme.dart';
-import 'package:designplus/widgets/bottom_slider.dart';
 import 'package:designplus/widgets/review_card.dart';
 import 'package:designplus/widgets/variants.dart';
 import 'package:flutter/material.dart';
@@ -235,34 +234,70 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        surfaceTintColor: kWhiteColor,
         leadingWidth: 80,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: kPrimaryColor),
-          onPressed: () => Navigator.pop(context),
+        leading: Container(
+          margin: EdgeInsets.only(left: 24),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Color(0xffE9EBFC),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                color: kPrimaryColor,
+                size: 20,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
         ),
         backgroundColor: Colors.white,
-        elevation: 0.5,
+        elevation: 0,
         shadowColor: kGreyColor,
         actions: [
-          IconButton(
-            icon: Icon(Icons.chat_bubble_outline, color: kPrimaryColor),
-            onPressed: () {
-              // Handle chat button
-            },
+          Container(
+            margin: EdgeInsets.only(right: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffE9EBFC),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.chat_bubble, color: kPrimaryColor, size: 20),
+                onPressed: () {},
+              ),
+            ),
           ),
-          IconButton(
-            icon: Icon(Icons.share_outlined, color: kPrimaryColor),
-            onPressed: () {
-              // Handle share button
-            },
+          Container(
+            margin: EdgeInsets.only(right: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffE9EBFC),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.share, color: kPrimaryColor, size: 20),
+                onPressed: () {},
+              ),
+            ),
           ),
-          IconButton(
-            icon: Icon(Icons.shopping_basket_outlined, color: kPrimaryColor),
-            onPressed: () {
-              // Handle cart button
-            },
+          Container(
+            margin: EdgeInsets.only(right: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color(0xffE9EBFC),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                icon: Icon(Icons.shopping_bag, color: kPrimaryColor, size: 20),
+                onPressed: () => {},
+              ),
+            ),
           ),
-          SizedBox(width: 8), // Spacing at the end
+          SizedBox(width: 12),
         ],
       ),
       backgroundColor: kWhiteColor,

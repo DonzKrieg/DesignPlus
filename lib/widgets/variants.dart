@@ -12,10 +12,10 @@ class _VariantBottomSheetState extends State<VariantBottomSheet> {
   String selectedVariant = "ID Card Only";
 
   final List<Map<String, dynamic>> variants = [
-    {"name": "ID Card Only", "image": "assets/id_card.png"},
-    {"name": "Lanyard Only", "image": "assets/lanyard.png"},
-    {"name": "ID Card + Lanyard", "image": "assets/card_lanyard.png"},
-    {"name": "ID Card + Frame Card", "image": "assets/frame_card.png"},
+    {"name": "ID Card Only", "image": "assets/images/lanyard1.png"},
+    {"name": "Lanyard Only", "image": "assets/images/lanyard2.png"},
+    {"name": "ID Card + Lanyard", "image": "assets/images/lanyard3.png"},
+    {"name": "ID Card + Frame Card", "image": "assets/images/lanyard4.png"},
   ];
 
   @override
