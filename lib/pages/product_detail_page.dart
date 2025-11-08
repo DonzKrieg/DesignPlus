@@ -225,6 +225,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   avatarImg: 'assets/images/beben.png',
                   reviewMsg: 'Produknya keren pak xixixi',
                 ),
+                ReviewCard(
+                  username: 'Beben Silalahi',
+                  avatarImg: 'assets/images/beben.png',
+                  reviewMsg: 'Bhapp... jujurr keren dul',
+                ),
               ],
             ),
           ],
@@ -332,7 +337,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       borderRadius: BorderRadiusGeometry.circular(10),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: Color(0xFFEBF4F1),
+                        content: Row(
+                          children: [
+                            Icon(Icons.check, color: kPositiveColor),
+                            SizedBox(width: 10),
+                            Text(
+                              'Berhasil ditambahkan ke keranjang',
+                              style: positiveTextStyle,
+                            ),
+                          ],
+                        ),
+                        duration: Duration(milliseconds: 1800),
+                      ),
+                    );
+                  },
                   child: Text(
                     'Tambah ke keranjang',
                     style: TextStyle(color: kPrimaryColor),
