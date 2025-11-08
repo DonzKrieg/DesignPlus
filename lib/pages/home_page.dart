@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:designplus/shared/theme.dart';
+import 'package:designplus/pages/product_detail_page.dart';
 import 'package:designplus/pages/product_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -346,7 +347,7 @@ class ProductCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailPage(product: product),
+            builder: (context) => const ProductDetailPage(),
           ),
         );
       },
@@ -443,140 +444,6 @@ class ProductCard extends StatelessWidget {
                     ],
                   ),
                 ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ======== HALAMAN DETAIL PRODUK (Disertakan di sini untuk kelengkapan) ========
-class ProductDetailPage extends StatelessWidget {
-  final Product product;
-  const ProductDetailPage({super.key, required this.product});
-
-  @override
-  Widget build(BuildContext context) {
-    const Color kStarColor = Colors.amber;
-
-    return Scaffold(
-      backgroundColor: kWhiteColor,
-      appBar: AppBar(
-        backgroundColor: kWhiteColor,
-        elevation: 2,
-        centerTitle: true,
-        title: Text(
-          'Detail Produk',
-          style: blackTextStyle.copyWith(fontWeight: semiBold, fontSize: 20),
-        ),
-        automaticallyImplyLeading: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: kLightGreyColor, height: 1.0),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                product.imageUrl,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 200,
-                    color: Colors.grey[300],
-                    child: Center(
-                      child: Text(
-                        'Gambar tidak ditemukan',
-                        style: greyTextStyle,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              product.name,
-              style: blackTextStyle.copyWith(fontSize: 20, fontWeight: bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Rp${product.price} /pcs',
-              style: primaryTextStyle.copyWith(fontSize: 18, fontWeight: bold),
-            ),
-            const SizedBox(height: 8),
-            Text(product.stockInfo, style: greyTextStyle),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.star_rate_rounded, color: kStarColor),
-                const SizedBox(width: 4),
-                Text(
-                  product.rating.toString(),
-                  style: blackTextStyle.copyWith(fontWeight: medium),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.location_on_outlined, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(product.location, style: greyTextStyle),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const Divider(color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(
-              'Deskripsi Produk',
-              style: blackTextStyle.copyWith(
-                fontWeight: semiBold,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Produk ini dibuat dengan bahan berkualitas tinggi dan dapat disesuaikan sesuai kebutuhan Anda. '
-              'Kami menerima pesanan custom dengan desain Anda sendiri.',
-              style: greyTextStyle.copyWith(fontSize: 14, height: 1.5),
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  // logika penambahan ke keranjang
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        '${product.name} ditambahkan ke keranjang!',
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kPrimaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Tambah ke Keranjang',
-                  style: whiteTextStyle.copyWith(
-                    fontWeight: semiBold,
-                    fontSize: 16,
-                  ),
-                ),
               ),
             ),
           ],
