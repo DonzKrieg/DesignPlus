@@ -17,6 +17,8 @@ TextStyle greyTextStyle = GoogleFonts.inter(color: kGreyColor);
 TextStyle primaryTextStyle = GoogleFonts.inter(color: kPrimaryColor);
 TextStyle whiteTextStyle = GoogleFonts.inter(color: kWhiteColor);
 TextStyle secondaryTextStyle = GoogleFonts.inter(color: kSecondaryColor);
+TextStyle negativeTextStyle = GoogleFonts.inter(color: kNegativeColor);
+TextStyle positiveTextStyle = GoogleFonts.inter(color: kPositiveColor);
 
 FontWeight light = FontWeight.w300;
 FontWeight regular = FontWeight.w400;
