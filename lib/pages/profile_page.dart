@@ -1,12 +1,45 @@
+import 'package:designplus/pages/edit_profile_field_page.dart';
 import 'package:designplus/shared/theme.dart';
 import 'package:designplus/widgets/profile_menu_item.dart';
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String name = 'Ucup Markucup';
+  String username = 'Ucupganz123';
+  String bio = 'Bhapppzzz';
+  String address = 'Jl. Sunny Ville No.5, Tangerang Selatan';
+  String phone = '081298317182';
+  String email = 'Ucupganz@gmail.com';
+  String gender = 'Pria';
+  String birthDate = '10 Januari 1992';
+
+  @override
   Widget build(BuildContext context) {
+    void _showSuccessSnackBar() {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Profil telah diperbarui',
+            style: TextStyle(color: kBlackColor),
+          ),
+          backgroundColor: Color(0xffE9EBFC),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(30),
+          duration: Duration(milliseconds: 1500),
+        ),
+      );
+    }
+
     Widget header() {
       return Container(
         padding: EdgeInsets.only(
@@ -20,16 +53,34 @@ class ProfilePage extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: AssetImage('assets/images/img_profile.png'),
-                  fit: BoxFit.cover,
+            Stack(
+              children: [
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/img_profile.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 25,
+                    height: 25,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: kWhiteColor,
+                      border: Border.all(color: kPrimaryColor, width: 0.5),
+                    ),
+                    child: Icon(Icons.edit, color: kPrimaryColor, size: 16),
+                  ),
+                ),
+              ],
             ),
             SizedBox(width: 18),
             Expanded(
@@ -37,21 +88,18 @@ class ProfilePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ucup Markucup',
+                    name,
                     style: blackTextStyle.copyWith(
                       fontSize: 17,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: semiBold,
                     ),
                   ),
                   Text(
-                    '@Ucupganz123',
+                    '@$username',
                     style: greyTextStyle.copyWith(fontSize: 12),
                   ),
                   SizedBox(height: 16),
-                  Text(
-                    'Bhapppzzz',
-                    style: blackTextStyle.copyWith(fontSize: 12),
-                  ),
+                  Text(bio, style: blackTextStyle.copyWith(fontSize: 12)),
                 ],
               ),
             ),
@@ -155,8 +203,54 @@ class ProfilePage extends StatelessWidget {
               style: blackTextStyle.copyWith(fontSize: 14, fontWeight: medium),
             ),
             SizedBox(height: 12),
-            ProfileMenuItem(title: 'Nama', value: 'Ucup Markucup'),
-            ProfileMenuItem(title: 'Username', value: 'Ucupganz123'),
+            ProfileMenuItem(
+              title: 'Nama',
+              value: name,
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditProfileFieldPage(
+                      title: 'Nama',
+                      initialValue: name,
+                      hint: 'Masukkan nama asli',
+                      description:
+                          'Pakai nama asli untuk memudahkan verifikasi. Nama ini akan tampil di beberapa halaman.',
+                    ),
+                  ),
+                );
+                if (result != null) {
+                  setState(() {
+                    name = result;
+                  });
+                  _showSuccessSnackBar();
+                }
+              },
+            ),
+            ProfileMenuItem(
+              title: 'Username',
+              value: username,
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditProfileFieldPage(
+                      title: 'Username',
+                      initialValue: username,
+                      hint: 'Masukkan username',
+                      description:
+                          'Username digunakan untuk login dan ditampilkan di profil Anda.',
+                    ),
+                  ),
+                );
+                if (result != null) {
+                  setState(() {
+                    username = result;
+                  });
+                  _showSuccessSnackBar();
+                }
+              },
+            ),
             ProfileMenuItem(title: 'Bio', value: 'Bhapppzzz'),
           ],
         ),
@@ -214,7 +308,7 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 8),
-              Icon(Icons.logout, color: Colors.red),
+              Icon(Icons.logout, color: kNegativeColor),
             ],
           ),
         ),
