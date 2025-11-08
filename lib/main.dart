@@ -6,6 +6,7 @@ import 'package:designplus/pages/onboarding_page.dart';
 import 'package:designplus/pages/product_page.dart';
 import 'package:designplus/pages/profile_page.dart';
 import 'package:designplus/pages/splash_page.dart';
+import 'package:designplus/pages/notification_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       routes: {
-        '/': (context) => SplashPage(),
+        '/': (context) => MainPage(),
         '/onboarding': (context) => OnboardingPage(),
         '/login': (context) => LoginPage(),
         '/main': (context) => MainPage(),
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/product': (context) => ProductPage(),
         '/cart': (context) => CartPage(),
         '/profile': (context) => ProfilePage(),
+        '/notification': (context) => const NotificationPage(),
       },
     );
   }
