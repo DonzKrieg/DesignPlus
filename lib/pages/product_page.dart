@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:designplus/shared/theme.dart';
-import 'package:designplus/widgets/bottom_nav.dart';
+import 'package:designplus/pages/product_detail_page.dart';
 
 // = = = = = = = = = = = = = CONFIG = = = = = = = = = = = = =
 class Product {
+  final int id;
   final String imageUrl;
   final String name;
   final int price;
@@ -13,6 +14,7 @@ class Product {
   final String category;
 
   Product({
+    required this.id,
     required this.imageUrl,
     required this.name,
     required this.price,
@@ -26,6 +28,7 @@ class Product {
 //  = = = = = = = = = = = = = DUMMY DATA = = = = = = = = = = = = =
 final List<Product> dummyProducts = [
   Product(
+    id: 1,
     imageUrl: 'assets/etalase_produk/id-card.jpeg',
     name: 'ID Card + Lanyard',
     price: 5000,
@@ -35,6 +38,7 @@ final List<Product> dummyProducts = [
     category: 'Media Promosi',
   ),
   Product(
+    id: 2,
     imageUrl: 'assets/etalase_produk/jersey.jpeg',
     name: 'Kaos Cotton Combed',
     price: 35000,
@@ -44,6 +48,7 @@ final List<Product> dummyProducts = [
     category: 'Kaos',
   ),
   Product(
+    id: 3,
     imageUrl:
         'assets/etalase_produk/Furniture Store Bifold Brochure Template PSD, INDD.jpeg',
     name: 'Brosur Company Profile',
@@ -54,6 +59,7 @@ final List<Product> dummyProducts = [
     category: 'Brosur',
   ),
   Product(
+    id: 4,
     imageUrl: 'assets/etalase_produk/totebag.jpeg',
     name: 'Custom Tote Bag',
     price: 10000,
@@ -63,6 +69,7 @@ final List<Product> dummyProducts = [
     category: 'Media Promosi',
   ),
   Product(
+    id: 5,
     imageUrl: 'assets/etalase_produk/id-card.jpeg',
     name: 'ID Card Premium',
     price: 8000,
@@ -72,6 +79,7 @@ final List<Product> dummyProducts = [
     category: 'Media Promosi',
   ),
   Product(
+    id: 6,
     imageUrl: 'assets/etalase_produk/x-banner.jpeg',
     name: 'X-Banner Event',
     price: 75000,
@@ -108,107 +116,58 @@ class _ProductPageState extends State<ProductPage> {
     _filteredProducts = List.from(dummyProducts);
   }
 
-  int _calculateCurrentIndex(BuildContext context) {
-    final String? currentRoute = ModalRoute.of(context)?.settings.name;
-    switch (currentRoute) {
-      case '/home':
-        return 0;
-      case '/product':
-        return 1;
-      case '/cart':
-        return 2;
-      case '/profile':
-        return 3;
-      default:
-        if (currentRoute == '/') {
-          return 1;
-        }
-        return 1;
-    }
-  }
-
-  // void _onItemTapped(int index) {
-  //   final String? currentRoute = ModalRoute.of(context)?.settings.name;
-
-  //   switch (index) {
-  //     case 0: // Beranda
-  //       if (currentRoute != '/home') {
-  //         Navigator.pushReplacementNamed(context, '/home');
-  //       }
-  //       break;
-  //     case 1: // Produk
-  //       if (currentRoute != '/product') {
-  //         Navigator.pushReplacementNamed(context, '/product');
-  //       }
-  //       break;
-  //     case 2: // Keranjang
-  //       if (currentRoute != '/cart') {
-  //         Navigator.pushReplacementNamed(context, '/cart');
-  //       }
-  //       break;
-  //     case 3: // Profile
-  //       if (currentRoute != '/profile') {
-  //         Navigator.pushReplacementNamed(context, '/profile');
-  //       }
-  //       break;
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
-    int currentIndex = _calculateCurrentIndex(context);
-
     return Scaffold(
       backgroundColor: kBackgroundColor,
       appBar: buildAppBar(),
       body: buildBody(),
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: currentIndex, 
-        // onTap: _onItemTapped, 
-      ),
     );
   }
 
-  // = = = = = = = = = = = = = WIDGET UNTUK APPBAR = = = = = = = = = = = = =
+  // = = = APP BAR = = =
   PreferredSizeWidget buildAppBar() {
     return AppBar(
       backgroundColor: kWhiteColor,
-      elevation: 0,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios, color: kBlackColor, size: 20),
-        onPressed: () {
-          if (Navigator.canPop(context)) {
-            Navigator.pop(context);
-          }
-        },
-      ),
+      elevation: 2,
+      centerTitle: true,
       title: Text(
         'Etalase Produk',
-        style: blackTextStyle.copyWith(fontWeight: semiBold, fontSize: 18),
+        style: blackTextStyle.copyWith(fontWeight: semiBold, fontSize: 20),
+      ),
+      automaticallyImplyLeading: false, 
+      shape: Border(
+        bottom: BorderSide(
+          color: kLightGreyColor, 
+          width: 1,
+        ),
       ),
     );
   }
 
-  // = = = = = = = = = = = = = WIDGET UNTUK BODY = = = = = = = = = = = = =
+  // = = = BODY = = =
   Widget buildBody() {
-    return Column(
-      children: [
-        buildFilterChips(),
-        Expanded(
-          child: _filteredProducts.isEmpty
-              ? Center(
-                  child: Text(
-                    'Produk untuk kategori ini belum tersedia',
-                    style: greyTextStyle.copyWith(fontSize: 16),
-                  ),
-                )
-              : buildProductGrid(),
-        ),
-      ],
+    return Padding(
+      padding: EdgeInsets.only(bottom: 80),
+      child: Column(
+        children: [
+          buildFilterChips(),
+          Expanded(
+            child: _filteredProducts.isEmpty
+                ? Center(
+                    child: Text(
+                      'Produk untuk kategori ini belum tersedia',
+                      style: greyTextStyle.copyWith(fontSize: 16),
+                    ),
+                  )
+                : buildProductGrid(),
+          ),
+        ],
+      ),
     );
   }
 
-  // = = = = = = = = = = = = = WIDGET UNTUK FILTER CHIPS = = = = = = = = = = = = =
+  // = = = FILTER CHIPS = = =
   Widget buildFilterChips() {
     return Container(
       height: 60,
@@ -258,7 +217,7 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-  // = = = = = = = = = = = = = WIDGET UNTUK GRID PRODUK = = = = = = = = = = = = =
+  // = = = GRID PRODUK = = =
   Widget buildProductGrid() {
     return GridView.builder(
       padding: EdgeInsets.all(16),
@@ -276,106 +235,120 @@ class _ProductPageState extends State<ProductPage> {
   }
 }
 
-// = = = = = = = = = = = = = PRODUCT CARD WIDGET = = = = = = = = = = = = =
+// = = = = = = = PRODUCT CARD = = = = = = =
 class ProductCard extends StatelessWidget {
   final Product product;
   const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: kWhiteColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductDetailPage(product: product),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.asset(
-              product.imageUrl,
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: kWhiteColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: Offset(0, 4),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  style: blackTextStyle.copyWith(fontWeight: medium),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 4),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      'Rp${product.price}',
-                      style: primaryTextStyle.copyWith(
-                        fontWeight: bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(width: 4),
-                    Text('/pcs', style: greyTextStyle.copyWith(fontSize: 12)),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Text(
-                  product.stockInfo,
-                  style: greyTextStyle.copyWith(fontSize: 10),
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.star_rate_rounded, color: kStarColor, size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      product.rating.toString(),
-                      style: blackTextStyle.copyWith(
-                        fontSize: 12,
-                        fontWeight: medium,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on_outlined,
-                      color: kGreyColor,
-                      size: 16,
-                    ),
-                    SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        product.location,
-                        style: greyTextStyle.copyWith(fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.asset(
+                product.imageUrl,
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: blackTextStyle.copyWith(fontWeight: medium),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 4),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        'Rp${product.price}',
+                        style: primaryTextStyle.copyWith(
+                          fontWeight: bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Text('/pcs', style: greyTextStyle.copyWith(fontSize: 12)),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    product.stockInfo,
+                    style: greyTextStyle.copyWith(fontSize: 10),
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.star_rate_rounded,
+                        color: kStarColor,
+                        size: 16,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        product.rating.toString(),
+                        style: blackTextStyle.copyWith(
+                          fontSize: 12,
+                          fontWeight: medium,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        color: kGreyColor,
+                        size: 16,
+                      ),
+                      SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          product.location,
+                          style: greyTextStyle.copyWith(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
