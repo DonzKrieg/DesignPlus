@@ -29,7 +29,6 @@ class MyApp extends StatelessWidget {
         'home': (context) => HomePage(),
         '/product': (context) => ProductPage(),
         '/cart': (context) => CartPage(),
-        '/profile': (context) => ProfilePage(),
         '/notification': (context) => const NotificationPage(),
       },
     );
