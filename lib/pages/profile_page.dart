@@ -4,7 +4,14 @@ import 'package:designplus/widgets/profile_menu_item.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final bool isLightMode;
+  final Function(bool) onThemeChanged;
+
+  const ProfilePage({
+    super.key,
+    required this.isLightMode,
+    required this.onThemeChanged,
+  });
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -20,25 +27,56 @@ class _ProfilePageState extends State<ProfilePage> {
   String gender = 'Pria';
   String birthDate = '10 Januari 1992';
 
+  late bool isLightMode;
+
+  @override
+  void initState() {
+    super.initState();
+    isLightMode = widget.isLightMode;
+  }
+
   @override
   Widget build(BuildContext context) {
-    void _showSuccessSnackBar() {
+    void showSuccessSnackBar() {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             'Profil telah diperbarui',
-            style: TextStyle(color: kBlackColor),
+            style: TextStyle(color: kWhiteColor),
           ),
-          backgroundColor: Color(0xffE9EBFC),
+          backgroundColor: kPositiveColor,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
           margin: EdgeInsets.all(30),
           duration: Duration(milliseconds: 1500),
+          action: SnackBarAction(
+            label: 'Tutup',
+            textColor: kWhiteColor,
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            },
+          ),
         ),
       );
     }
+
+    final pageBg = isLightMode ? Color(0xffE9EBFC) : Color(0xFF0B1220);
+    final sectionBg = isLightMode ? kWhiteColor : Color(0xFF0F1720);
+    final nameStyle = blackTextStyle.copyWith(
+      fontSize: 17,
+      fontWeight: semiBold,
+      color: isLightMode ? kBlackColor : kWhiteColor,
+    );
+    final usernameStyle = greyTextStyle.copyWith(
+      fontSize: 12,
+      color: isLightMode ? null : Colors.grey[400],
+    );
+    final bioStyle = blackTextStyle.copyWith(
+      fontSize: 12,
+      color: isLightMode ? kBlackColor : Colors.grey[300],
+    );
 
     Widget header() {
       return Container(
@@ -49,7 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
           bottom: 24,
         ),
         margin: EdgeInsets.only(top: 0),
-        color: kWhiteColor,
+        color: sectionBg,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -87,33 +125,46 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: blackTextStyle.copyWith(
-                      fontSize: 17,
-                      fontWeight: semiBold,
-                    ),
-                  ),
-                  Text(
-                    '@$username',
-                    style: greyTextStyle.copyWith(fontSize: 12),
-                  ),
+                  Text(name, style: nameStyle),
+                  Text('@$username', style: usernameStyle),
                   SizedBox(height: 16),
-                  Text(bio, style: blackTextStyle.copyWith(fontSize: 12)),
+                  Text(bio, style: bioStyle),
                 ],
               ),
             ),
-            Container(
-              width: 88,
-              height: 44,
-              padding: EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Color(0xffE9EBFC),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Image.asset('assets/images/icon_switch_dark.png'),
+
+            GestureDetector(
+              onTap: () {
+                isLightMode = !isLightMode;
+                widget.onThemeChanged(isLightMode);
+                setState(() {});
+              },
+              child: Container(
+                width: 88,
+                height: 44,
+                padding: EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  color: isLightMode ? Color(0xffE9EBFC) : Color(0xFF202732),
+                ),
+                child: AnimatedAlign(
+                  duration: Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                  alignment: isLightMode
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                    child: Image.asset(
+                      isLightMode
+                          ? 'assets/images/icon_switch_dark.png'
+                          : 'assets/images/icon_switch_light.png',
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -124,13 +175,17 @@ class _ProfilePageState extends State<ProfilePage> {
     Widget orderStatus() {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        color: kWhiteColor,
+        color: sectionBg,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Status Pesanan',
-              style: blackTextStyle.copyWith(fontSize: 16, fontWeight: medium),
+              style: blackTextStyle.copyWith(
+                fontSize: 16,
+                fontWeight: medium,
+                color: isLightMode ? kBlackColor : kWhiteColor,
+              ),
             ),
             SizedBox(height: 16),
             Row(
@@ -138,48 +193,86 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 Column(
                   children: [
-                    Icon(Icons.payment, color: kBlackColor, size: 24),
+                    Icon(
+                      Icons.payment,
+                      color: isLightMode ? kBlackColor : kWhiteColor,
+                      size: 24,
+                    ),
                     SizedBox(height: 5),
-                    Text('Bayar', style: blackTextStyle.copyWith(fontSize: 12)),
+                    Text(
+                      'Bayar',
+                      style: blackTextStyle.copyWith(
+                        fontSize: 12,
+                        color: isLightMode ? kBlackColor : Colors.grey[300],
+                      ),
+                    ),
                   ],
                 ),
                 Column(
                   children: [
-                    Icon(Icons.access_time, color: kBlackColor, size: 24),
+                    Icon(
+                      Icons.access_time,
+                      color: isLightMode ? kBlackColor : kWhiteColor,
+                      size: 24,
+                    ),
                     SizedBox(height: 5),
                     Text(
                       'Diproses',
-                      style: blackTextStyle.copyWith(fontSize: 12),
+                      style: blackTextStyle.copyWith(
+                        fontSize: 12,
+                        color: isLightMode ? kBlackColor : Colors.grey[300],
+                      ),
                     ),
                   ],
                 ),
                 Column(
                   children: [
-                    Icon(Icons.local_shipping, color: kBlackColor, size: 24),
+                    Icon(
+                      Icons.local_shipping,
+                      color: isLightMode ? kBlackColor : kWhiteColor,
+                      size: 24,
+                    ),
                     SizedBox(height: 5),
                     Text(
                       'Dikirim',
-                      style: blackTextStyle.copyWith(fontSize: 12),
+                      style: blackTextStyle.copyWith(
+                        fontSize: 12,
+                        color: isLightMode ? kBlackColor : Colors.grey[300],
+                      ),
                     ),
                   ],
                 ),
                 Column(
                   children: [
-                    Icon(Icons.check_box, color: kBlackColor, size: 24),
+                    Icon(
+                      Icons.check_box,
+                      color: isLightMode ? kBlackColor : kWhiteColor,
+                      size: 24,
+                    ),
                     SizedBox(height: 5),
                     Text(
                       'Pesanan Tiba',
-                      style: blackTextStyle.copyWith(fontSize: 12),
+                      style: blackTextStyle.copyWith(
+                        fontSize: 12,
+                        color: isLightMode ? kBlackColor : Colors.grey[300],
+                      ),
                     ),
                   ],
                 ),
                 Column(
                   children: [
-                    Icon(Icons.favorite_border, color: kBlackColor, size: 24),
+                    Icon(
+                      Icons.favorite_border,
+                      color: isLightMode ? kBlackColor : kWhiteColor,
+                      size: 24,
+                    ),
                     SizedBox(height: 5),
                     Text(
                       'Disukai',
-                      style: blackTextStyle.copyWith(fontSize: 12),
+                      style: blackTextStyle.copyWith(
+                        fontSize: 12,
+                        color: isLightMode ? kBlackColor : Colors.grey[300],
+                      ),
                     ),
                   ],
                 ),
@@ -194,18 +287,23 @@ class _ProfilePageState extends State<ProfilePage> {
     Widget profileInfo() {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        color: kWhiteColor,
+        color: sectionBg,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Info Profil',
-              style: blackTextStyle.copyWith(fontSize: 14, fontWeight: medium),
+              style: blackTextStyle.copyWith(
+                fontSize: 14,
+                fontWeight: medium,
+                color: isLightMode ? kBlackColor : kWhiteColor,
+              ),
             ),
             SizedBox(height: 12),
             ProfileMenuItem(
               title: 'Nama',
               value: name,
+              textColor: isLightMode ? kBlackColor : kWhiteColor,
               onTap: () async {
                 final result = await Navigator.push(
                   context,
@@ -223,12 +321,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   setState(() {
                     name = result;
                   });
-                  _showSuccessSnackBar();
+                  showSuccessSnackBar();
                 }
               },
             ),
             ProfileMenuItem(
               title: 'Username',
+              textColor: isLightMode ? kBlackColor : kWhiteColor,
               value: username,
               onTap: () async {
                 final result = await Navigator.push(
@@ -247,11 +346,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   setState(() {
                     username = result;
                   });
-                  _showSuccessSnackBar();
+                  showSuccessSnackBar();
                 }
               },
             ),
-            ProfileMenuItem(title: 'Bio', value: 'Bhapppzzz'),
+            ProfileMenuItem(
+              title: 'Bio',
+              textColor: isLightMode ? kBlackColor : kWhiteColor,
+              value: bio,
+            ),
           ],
         ),
       );
@@ -260,23 +363,44 @@ class _ProfilePageState extends State<ProfilePage> {
     Widget personalInfo() {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        color: kWhiteColor,
+        color: sectionBg,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Info Data Diri',
-              style: blackTextStyle.copyWith(fontSize: 14, fontWeight: medium),
+              style: blackTextStyle.copyWith(
+                fontSize: 14,
+                fontWeight: medium,
+                color: isLightMode ? kBlackColor : kWhiteColor,
+              ),
             ),
             SizedBox(height: 12),
             ProfileMenuItem(
               title: 'Alamat',
-              value: 'Jl. Sunny Ville No.5, Tangerang Selatan',
+              value: address,
+              textColor: isLightMode ? kBlackColor : kWhiteColor,
             ),
-            ProfileMenuItem(title: 'No. Hp', value: '081298317182'),
-            ProfileMenuItem(title: 'Email', value: 'Ucupganz@gmail.com'),
-            ProfileMenuItem(title: 'Jenis Kelamin', value: 'Pria'),
-            ProfileMenuItem(title: 'Tanggal Lahir', value: '10 Januari 1992'),
+            ProfileMenuItem(
+              title: 'No. Hp',
+              value: phone,
+              textColor: isLightMode ? kBlackColor : kWhiteColor,
+            ),
+            ProfileMenuItem(
+              title: 'Email',
+              value: email,
+              textColor: isLightMode ? kBlackColor : kWhiteColor,
+            ),
+            ProfileMenuItem(
+              title: 'Jenis Kelamin',
+              value: gender,
+              textColor: isLightMode ? kBlackColor : kWhiteColor,
+            ),
+            ProfileMenuItem(
+              title: 'Tanggal Lahir',
+              value: birthDate,
+              textColor: isLightMode ? kBlackColor : kWhiteColor,
+            ),
           ],
         ),
       );
@@ -285,11 +409,13 @@ class _ProfilePageState extends State<ProfilePage> {
     Widget logoutButton() {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        color: kWhiteColor,
+        color: sectionBg,
         child: TextButton(
           onPressed: () {},
           style: TextButton.styleFrom(
-            backgroundColor: Colors.red.shade50,
+            backgroundColor: isLightMode
+                ? Colors.red.shade50
+                : Colors.red.shade900.withOpacity(0.12),
             padding: EdgeInsets.symmetric(vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -316,7 +442,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
-      backgroundColor: Color(0xffE9EBFC),
+      backgroundColor: pageBg,
       body: ListView(
         padding: EdgeInsets.only(bottom: 105),
         children: [

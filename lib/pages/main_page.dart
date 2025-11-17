@@ -14,9 +14,13 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int currentIndex = 0;
+  bool isLightMode = true;
 
   @override
   Widget build(BuildContext context) {
+    final pageBg = isLightMode ? Color(0xffE9EBFC) : Color(0xFF0B1220);
+    final navBg = isLightMode ? kWhiteColor : Color(0xFF0F1720);
+
     Widget buildContent(int currentIndex) {
       switch (currentIndex) {
         case 0:
@@ -26,7 +30,14 @@ class _MainPageState extends State<MainPage> {
         case 2:
           return CartPage();
         case 3:
-          return ProfilePage();
+          return ProfilePage(
+            isLightMode: isLightMode,
+            onThemeChanged: (bool newMode) {
+              setState(() {
+                isLightMode = newMode;
+              });
+            },
+          );
         default:
           return HomePage();
       }
@@ -36,7 +47,7 @@ class _MainPageState extends State<MainPage> {
       return Container(
         padding: EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: kWhiteColor,
+          color: navBg,
           boxShadow: [
             BoxShadow(
               color: kGreyColor.withOpacity(0.1),
@@ -56,7 +67,7 @@ class _MainPageState extends State<MainPage> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedItemColor: kPrimaryColor,
-          unselectedItemColor: kSecondaryColor,
+          unselectedItemColor: isLightMode ? kSecondaryColor : Colors.grey[600],
           showSelectedLabels: true,
           showUnselectedLabels: true,
           selectedLabelStyle: primaryTextStyle.copyWith(
@@ -94,6 +105,7 @@ class _MainPageState extends State<MainPage> {
     }
 
     return Scaffold(
+      backgroundColor: pageBg,
       body: Stack(
         children: [
           buildContent(currentIndex),
