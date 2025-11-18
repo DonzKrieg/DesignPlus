@@ -298,7 +298,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
               child: IconButton(
                 icon: Icon(Icons.shopping_bag, color: kPrimaryColor, size: 20),
-                onPressed: () => {},
+                onPressed: () => {Navigator.pushNamed(context, '/cart')},
               ),
             ),
           ),
