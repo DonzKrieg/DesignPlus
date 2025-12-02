@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:designplus/shared/theme.dart';
 import 'package:designplus/pages/product_detail_page.dart';
+import 'package:designplus/shared/theme.dart';
 import 'package:designplus/pages/product_page.dart';
 
 class HomePage extends StatefulWidget {
