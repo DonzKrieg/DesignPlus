@@ -4,7 +4,10 @@ import 'package:designplus/pages/login_page.dart';
 import 'package:designplus/pages/main_page.dart';
 import 'package:designplus/pages/onboarding_page.dart';
 import 'package:designplus/pages/product_page.dart';
+<<<<<<< Updated upstream
 import 'package:designplus/pages/profile_page.dart';
+=======
+>>>>>>> Stashed changes
 import 'package:designplus/pages/splash_page.dart';
 import 'package:flutter/material.dart';
 
