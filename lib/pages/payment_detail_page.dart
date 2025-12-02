@@ -10,10 +10,10 @@ class PaymentDetailPage extends StatefulWidget {
   final String paymentMethod;
 
   const PaymentDetailPage({
-    Key? key,
+    super.key,
     required this.totalAmount,
     required this.paymentMethod,
-  }) : super(key: key);
+  });
 
   @override
   State<PaymentDetailPage> createState() => _PaymentDetailPageState();
