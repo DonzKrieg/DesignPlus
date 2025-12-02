@@ -1,11 +1,20 @@
 import 'package:designplus/shared/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ProfileMenuItem extends StatelessWidget {
   final String title;
   final String value;
+  final VoidCallback? onTap;
+  final Color textColor;
 
-  const ProfileMenuItem({super.key, required this.title, required this.value});
+  const ProfileMenuItem({
+    super.key,
+    required this.title,
+    required this.value,
+    this.onTap,
+    required this.textColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,24 +28,31 @@ class ProfileMenuItem extends StatelessWidget {
         children: [
           Text(
             title,
-            style: blackTextStyle.copyWith(fontWeight: semiBold, fontSize: 12),
+            style: GoogleFonts.inter(
+              color: textColor,
+              fontSize: 12,
+              fontWeight: semiBold,
+            ),
           ),
           SizedBox(width: 30),
           Flexible(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    value,
-                    style: greyTextStyle.copyWith(fontSize: 12),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+            child: GestureDetector(
+              onTap: onTap,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      value,
+                      style: greyTextStyle.copyWith(fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                   ),
-                ),
-                SizedBox(width: 4),
-                Icon(Icons.chevron_right, color: kGreyColor, size: 20),
-              ],
+                  SizedBox(width: 4),
+                  Icon(Icons.chevron_right, color: kGreyColor, size: 20),
+                ],
+              ),
             ),
           ),
         ],

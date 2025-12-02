@@ -135,13 +135,8 @@ class _ProductPageState extends State<ProductPage> {
         'Etalase Produk',
         style: blackTextStyle.copyWith(fontWeight: semiBold, fontSize: 20),
       ),
-      automaticallyImplyLeading: false, 
-      shape: Border(
-        bottom: BorderSide(
-          color: kLightGreyColor, 
-          width: 1,
-        ),
-      ),
+      automaticallyImplyLeading: false,
+      shape: Border(bottom: BorderSide(color: kLightGreyColor, width: 1)),
     );
   }
 
@@ -246,9 +241,7 @@ class ProductCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => ProductDetailPage(product: product),
-          ),
+          MaterialPageRoute(builder: (_) => ProductDetailPage()),
         );
       },
       child: Container(
