@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:designplus/models/user_model.dart';
 import 'package:designplus/pages/edit_profile_field_page.dart';
 import 'package:designplus/shared/theme.dart';
 import 'package:designplus/widgets/profile_menu_item.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -18,21 +21,84 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String name = 'Ucup Markucup';
-  String username = 'Ucupganz123';
-  String bio = 'Bhapppzzz';
-  String address = 'Jl. Sunny Ville No.5, Tangerang Selatan';
-  String phone = '081298317182';
-  String email = 'Ucupganz@gmail.com';
-  String gender = 'Pria';
-  String birthDate = '10 Januari 1992';
+  String name = '';
+  String username = '';
+  String bio = '';
+  String address = '';
+  String phone = '';
+  String email = '';
+  String gender = '';
+  String birthDate = '';
 
+  bool _isLoading = true;
   late bool isLightMode;
+  User? currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
     isLightMode = widget.isLightMode;
+    fetchUserData();
+  }
+
+  // 2. Fungsi Ambil Data dari Firestore
+  Future<void> fetchUserData() async {
+    if (currentUser == null) return;
+
+    try {
+      // Di sini Anda memberi nama variabel 'userDoc'
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid)
+          .get();
+
+      // PERBAIKAN: Gunakan 'userDoc', bukan 'doc'
+      if (userDoc.exists) {
+        // PERBAIKAN: Gunakan 'userDoc' di sini juga
+        UserModel user = UserModel.fromJson(
+          userDoc.id,
+          userDoc.data() as Map<String, dynamic>,
+        );
+
+        setState(() {
+          name = user.fullName;
+          username = user.username;
+          bio = user.bio;
+          address = user.address;
+          phone = user.phone;
+          email = user.email;
+          gender = user.gender;
+          birthDate = user.birthDate;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching profile: $e");
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // 3. Fungsi Update Data ke Firestore (Dipanggil setelah edit)
+  Future<void> updateFirestoreData(String field, String value) async {
+    if (currentUser == null) return;
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid)
+          .update({field: value});
+
+      // Jika field nama, update juga fullName untuk konsistensi
+      if (field == 'firstName' || field == 'lastName') {
+        // Logic tambahan jika diperlukan
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal update data: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -285,6 +351,8 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     Widget profileInfo() {
+      if (_isLoading) return const Center(child: CircularProgressIndicator());
+
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         color: sectionBg,
@@ -318,9 +386,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 );
                 if (result != null) {
-                  setState(() {
-                    name = result;
-                  });
+                  // Update UI Lokal
+                  setState(() => name = result);
+                  // Update ke Firestore (misal kita simpan ke field 'fullName')
+                  updateFirestoreData('fullName', result);
                   showSuccessSnackBar();
                 }
               },
@@ -343,17 +412,34 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 );
                 if (result != null) {
-                  setState(() {
-                    username = result;
-                  });
+                  setState(() => username = result);
+                  updateFirestoreData('username', result); // Update Firestore
                   showSuccessSnackBar();
                 }
               },
             ),
             ProfileMenuItem(
               title: 'Bio',
-              textColor: isLightMode ? kBlackColor : kWhiteColor,
               value: bio,
+              textColor: isLightMode ? kBlackColor : kWhiteColor,
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditProfileFieldPage(
+                      title: 'Bio',
+                      initialValue: bio,
+                      hint: 'Tulis bio singkat',
+                      description: 'Deskripsi singkat diri Anda.',
+                    ),
+                  ),
+                );
+                if (result != null) {
+                  setState(() => bio = result);
+                  updateFirestoreData('bio', result); // Update Firestore
+                  showSuccessSnackBar();
+                }
+              },
             ),
           ],
         ),
@@ -411,7 +497,17 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         color: sectionBg,
         child: TextButton(
-          onPressed: () {},
+          onPressed: () async {
+            // Logic Logout Firebase
+            await FirebaseAuth.instance.signOut();
+
+            if (mounted) {
+              // Kembali ke Login dan hapus semua stack navigasi
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/login', (route) => false);
+            }
+          },
           style: TextButton.styleFrom(
             backgroundColor: isLightMode
                 ? Colors.red.shade50
@@ -443,20 +539,23 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: pageBg,
-      body: ListView(
-        padding: EdgeInsets.only(bottom: 105),
-        children: [
-          header(),
-          SizedBox(height: 5),
-          orderStatus(),
-          SizedBox(height: 5),
-          profileInfo(),
-          SizedBox(height: 5),
-          personalInfo(),
-          SizedBox(height: 5),
-          logoutButton(),
-        ],
-      ),
+      // Gunakan Loading Indicator jika data belum siap
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator(color: kPrimaryColor))
+          : ListView(
+              padding: EdgeInsets.only(bottom: 105),
+              children: [
+                header(), // Pastikan di header() variabel 'name' & 'username' dipanggil
+                SizedBox(height: 5),
+                orderStatus(),
+                SizedBox(height: 5),
+                profileInfo(),
+                SizedBox(height: 5),
+                personalInfo(), // Pastikan personalInfo() memanggil var 'address', 'phone', dll
+                SizedBox(height: 5),
+                logoutButton(),
+              ],
+            ),
     );
   }
 }
