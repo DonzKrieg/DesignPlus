@@ -55,7 +55,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
@@ -82,8 +81,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 28),
-
-                  // Username
                   Text(
                     'Username',
                     style: blackTextStyle.copyWith(
@@ -110,7 +107,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 18),
-
                   Text(
                     'Password',
                     style: blackTextStyle.copyWith(
@@ -145,7 +141,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-
                   Row(
                     children: [
                       GestureDetector(
@@ -182,9 +177,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 24),
-
                   CustomButton(
                     text: 'Masuk',
                     onPressed: () {
@@ -193,9 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                     size: Size(screenW, 54),
                     color: kPrimaryColor,
                   ),
-
                   const SizedBox(height: 21),
-
                   Row(
                     children: [
                       Expanded(
@@ -210,9 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 25),
-
                   InkWell(
                     onTap: () {},
                     borderRadius: BorderRadius.circular(12),
@@ -254,9 +243,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 28),
-
                   Center(
                     child: RichText(
                       text: TextSpan(
