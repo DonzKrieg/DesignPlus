@@ -25,11 +25,14 @@ class MyApp extends StatelessWidget {
         '/': (context) => SplashPage(),
         '/onboarding': (context) => OnboardingPage(),
         '/login': (context) => LoginPage(),
+        '/register': (context) => RegisterPage(),
         '/main': (context) => MainPage(),
         'home': (context) => HomePage(),
         '/product': (context) => ProductPage(),
         '/cart': (context) => CartPage(),
         '/notification': (context) => const NotificationPage(),
+        '/profile': (context) =>
+            ProfilePage(isLightMode: true, onThemeChanged: (_) {}),
       },
     );
   }

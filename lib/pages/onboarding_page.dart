@@ -80,8 +80,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ),
                       ),
                       Container(
-                        width: 79,
-                        height: 42,
                         padding: EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 8,
@@ -160,7 +158,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         CustomButton(
                           text: 'Mulai Sekarang',
                           onPressed: () {
-                            Navigator.pushNamed(context, '/main');
+                            Navigator.pushNamed(context, '/login');
                           },
                           size: Size(double.infinity, 49),
                           color: kPrimaryColor,
