@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "437387878706",
+    "project_id": "designplus-db",
+    "storage_bucket": "designplus-db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437387878706:android:da6ce4585dc59b0a70372b",
+        "android_client_info": {
+          "package_name": "com.example.designplus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFRdEgaL-r_YkJnkuDkrNKxKYGoqwOM_g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
