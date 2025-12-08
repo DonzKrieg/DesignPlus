@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:designplus/shared/theme.dart';
 import 'package:designplus/pages/product_detail_page.dart';
+import 'package:designplus/services/firestore_service.dart';
 
-// = = = = = = = = = = = = = CONFIG = = = = = = = = = = = = =
+// = = = = = = = = = = = = = MODEL PRODUCT  = = = = = = = = = = = = =
 class Product {
-  final int id;
+  final String id; 
   final String imageUrl;
   final String name;
   final int price;
@@ -23,74 +25,35 @@ class Product {
     required this.location,
     required this.category,
   });
+
+  factory Product.fromSnapshot(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Product(
+      id: doc.id,
+      imageUrl: data['imageUrl'] ?? '',
+      name: data['name'] ?? 'No Name',
+      price: data['price'] ?? 0,
+      stockInfo: data['stockInfo'] ?? 'Ready',
+      rating: (data['rating'] ?? 0.0).toDouble(),
+      location: data['location'] ?? '-',
+      category: data['category'] ?? 'Uncategorized',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'imageUrl': imageUrl,
+      'name': name,
+      'price': price,
+      'stockInfo': stockInfo,
+      'rating': rating,
+      'location': location,
+      'category': category,
+    };
+  }
 }
 
-//  = = = = = = = = = = = = = DUMMY DATA = = = = = = = = = = = = =
-final List<Product> dummyProducts = [
-  Product(
-    id: 1,
-    imageUrl: 'assets/etalase_produk/id-card.jpeg',
-    name: 'ID Card + Lanyard',
-    price: 5000,
-    stockInfo: 'Stok 80rb+ • Terjual 20rb+',
-    rating: 4.8,
-    location: 'Kota Bandung',
-    category: 'Media Promosi',
-  ),
-  Product(
-    id: 2,
-    imageUrl: 'assets/etalase_produk/jersey.jpeg',
-    name: 'Kaos Cotton Combed',
-    price: 35000,
-    stockInfo: 'Stok 55rb+ • Terjual 72rb+',
-    rating: 4.3,
-    location: 'Kota Administrasi Jakarta',
-    category: 'Kaos',
-  ),
-  Product(
-    id: 3,
-    imageUrl:
-        'assets/etalase_produk/Furniture Store Bifold Brochure Template PSD, INDD.jpeg',
-    name: 'Brosur Company Profile',
-    price: 12000,
-    stockInfo: 'Stok 100rb+ • Terjual 150rb+',
-    rating: 5.0,
-    location: 'Kab. Bandung',
-    category: 'Brosur',
-  ),
-  Product(
-    id: 4,
-    imageUrl: 'assets/etalase_produk/totebag.jpeg',
-    name: 'Custom Tote Bag',
-    price: 10000,
-    stockInfo: 'Stok 80rb+ • Terjual 20rb+',
-    rating: 4.8,
-    location: 'Kota Bandung',
-    category: 'Media Promosi',
-  ),
-  Product(
-    id: 5,
-    imageUrl: 'assets/etalase_produk/id-card.jpeg',
-    name: 'ID Card Premium',
-    price: 8000,
-    stockInfo: 'Stok 50rb+ • Terjual 10rb+',
-    rating: 4.9,
-    location: 'Kota Bandung',
-    category: 'Media Promosi',
-  ),
-  Product(
-    id: 6,
-    imageUrl: 'assets/etalase_produk/x-banner.jpeg',
-    name: 'X-Banner Event',
-    price: 75000,
-    stockInfo: 'Stok 1rb+ • Terjual 500+',
-    rating: 4.7,
-    location: 'Jakarta Selatan',
-    category: 'Media Promosi',
-  ),
-];
-
-//  = = = = = = = = = = = = = PRODUCT PAGE WIDGET = = = = = = = = = = = = =
+// = = = = = = = = = = = = = PRODUCT PAGE WIDGET = = = = = = = = = = = = =
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
 
@@ -99,6 +62,9 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductPageState extends State<ProductPage> {
+  // Instance dari Service Firestore
+  final FirestoreService _firestoreService = FirestoreService();
+
   final List<String> filters = [
     'Semua',
     'Media Cetak',
@@ -106,15 +72,8 @@ class _ProductPageState extends State<ProductPage> {
     'Kaos',
     'Brosur',
   ];
-  late String _selectedCategory;
-  late List<Product> _filteredProducts;
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedCategory = filters[0];
-    _filteredProducts = List.from(dummyProducts);
-  }
+  String _selectedCategory = 'Semua';
 
   @override
   Widget build(BuildContext context) {
@@ -148,14 +107,59 @@ class _ProductPageState extends State<ProductPage> {
         children: [
           buildFilterChips(),
           Expanded(
-            child: _filteredProducts.isEmpty
-                ? Center(
+            // Menggunakan StreamBuilder untuk data real-time
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _firestoreService.getProduct(), // Panggil method dari service
+              builder: (context, snapshot) {
+                // 1. Cek status loading
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                // 2. Cek jika ada error
+                if (snapshot.hasError) {
+                  return Center(child: Text('Terjadi kesalahan memuat data'));
+                }
+
+                // 3. Cek jika data kosong
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'Belum ada produk tersimpan',
+                      style: greyTextStyle.copyWith(fontSize: 16),
+                    ),
+                  );
+                }
+
+                // 4. Konversi data snapshot ke List<Product>
+                List<Product> allProducts = snapshot.data!.docs.map((doc) {
+                  return Product.fromSnapshot(doc);
+                }).toList();
+
+                // 5. Filter data berdasarkan kategori yang dipilih
+                List<Product> filteredProducts;
+                if (_selectedCategory == 'Semua') {
+                  filteredProducts = allProducts;
+                } else {
+                  filteredProducts = allProducts
+                      .where((p) => p.category == _selectedCategory)
+                      .toList();
+                }
+
+                // 6. Tampilkan pesan jika hasil filter kosong
+                if (filteredProducts.isEmpty) {
+                  return Center(
                     child: Text(
                       'Produk untuk kategori ini belum tersedia',
                       style: greyTextStyle.copyWith(fontSize: 16),
                     ),
-                  )
-                : buildProductGrid(),
+                  );
+                }
+
+                // 7. Tampilkan Grid
+                return buildProductGrid(filteredProducts);
+              },
+            ),
           ),
         ],
       ),
@@ -193,16 +197,8 @@ class _ProductPageState extends State<ProductPage> {
               onPressed: () {
                 setState(() {
                   _selectedCategory = filters[index];
-
-                  if (_selectedCategory == 'Semua') {
-                    _filteredProducts = List.from(dummyProducts);
-                  } else {
-                    _filteredProducts = dummyProducts
-                        .where(
-                          (product) => product.category == _selectedCategory,
-                        )
-                        .toList();
-                  }
+                  // SetState akan memicu rebuild, dan StreamBuilder
+                  // akan menjalankan logika filternya lagi.
                 });
               },
             ),
@@ -213,7 +209,8 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   // = = = GRID PRODUK = = =
-  Widget buildProductGrid() {
+  // Sekarang menerima parameter List<Product> hasil filter
+  Widget buildProductGrid(List<Product> products) {
     return GridView.builder(
       padding: EdgeInsets.all(16),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -222,9 +219,9 @@ class _ProductPageState extends State<ProductPage> {
         mainAxisSpacing: 16,
         childAspectRatio: 0.50,
       ),
-      itemCount: _filteredProducts.length,
+      itemCount: products.length,
       itemBuilder: (context, index) {
-        return ProductCard(product: _filteredProducts[index]);
+        return ProductCard(product: products[index]);
       },
     );
   }
@@ -239,6 +236,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        // Navigasi ke detail page (pastikan ProductDetailPage menerima parameter product jika perlu)
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => ProductDetailPage()),
@@ -259,14 +257,10 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // = = = IMAGE HANDLER = = =
             ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.asset(
-                product.imageUrl,
-                height: 150,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: _buildImage(product.imageUrl),
             ),
             Padding(
               padding: EdgeInsets.all(12),
@@ -343,6 +337,49 @@ class ProductCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // Helper untuk menentukan apakah gambar dari Network atau Asset
+  Widget _buildImage(String url) {
+    // Jika URL dimulai dengan http/https, load dari internet
+    if (url.startsWith('http')) {
+      return Image.network(
+        url,
+        height: 150,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          // Placeholder jika gambar gagal dimuat
+          return Container(
+            height: 150,
+            color: Colors.grey[300],
+            child: Icon(Icons.broken_image, color: Colors.grey),
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            height: 150,
+            color: Colors.grey[100],
+            child: Center(child: CircularProgressIndicator()),
+          );
+        },
+      );
+    }
+    // Jika tidak, asumsikan asset lokal
+    return Image.asset(
+      url,
+      height: 150,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          height: 150,
+          color: Colors.grey[300],
+          child: Icon(Icons.image_not_supported, color: Colors.grey),
+        );
+      },
     );
   }
 }
