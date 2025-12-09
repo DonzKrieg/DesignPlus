@@ -1,6 +1,7 @@
 import 'package:designplus/pages/cart_page.dart';
 import 'package:designplus/pages/home_page.dart';
 import 'package:designplus/pages/login_page.dart';
+import 'package:designplus/pages/register_page.dart';
 import 'package:designplus/pages/main_page.dart';
 import 'package:designplus/pages/notification_page.dart';
 import 'package:designplus/pages/onboarding_page.dart';
@@ -8,7 +9,7 @@ import 'package:designplus/pages/product_page.dart';
 import 'package:designplus/pages/profile_page.dart';
 import 'package:designplus/pages/splash_page.dart';
 import 'package:flutter/material.dart';
-  
+
 void main() {
   runApp(const MyApp());
 }
