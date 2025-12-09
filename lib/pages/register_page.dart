@@ -1,9 +1,9 @@
-import 'package:designplus/services/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// Pastikan import ini sesuai dengan struktur project Anda
 import 'package:designplus/shared/theme.dart';
 import 'package:designplus/widgets/custom_button.dart';
+import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:designplus/services/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -13,32 +13,37 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // Page Controller untuk navigasi slide
   final PageController _pageController = PageController();
-
-  // State untuk melacak halaman aktif (0, 1, 2, 3)
   int _currentIndex = 0;
+  bool _isLoading = false;
 
-  // Controllers - Agar data bisa diambil saat integrasi Firebase nanti
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController(
     text: '+62',
   );
+
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _birthDateController = TextEditingController();
+
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _districtController =
-      TextEditingController(); // Kelurahan
-  final TextEditingController _subDistrictController =
-      TextEditingController(); // Kecamatan
+  final TextEditingController _districtController = TextEditingController();
+  final TextEditingController _subDistrictController = TextEditingController();
   final TextEditingController _zipCodeController = TextEditingController();
+
+  String _gender = '';
 
   @override
   void dispose() {
     _pageController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     _phoneController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _birthDateController.dispose();
     _addressController.dispose();
     _cityController.dispose();
     _districtController.dispose();
@@ -47,29 +52,66 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  // Fungsi navigasi 'Lanjutkan'
+  bool _validateCurrentStep() {
+    if (_currentIndex == 0) {
+      // Step 1: Akun
+      if (_emailController.text.isEmpty ||
+          !_emailController.text.contains('@')) {
+        _showError('Masukkan email yang valid.');
+        return false;
+      }
+      if (_passwordController.text.length < 6) {
+        _showError('Password minimal 6 karakter.');
+        return false;
+      }
+      if (_phoneController.text.isEmpty) {
+        _showError('Nomor telepon wajib diisi.');
+        return false;
+      }
+    } else if (_currentIndex == 1) {
+      // Step 2: Data Diri
+      if (_firstNameController.text.isEmpty) {
+        _showError('Nama depan wajib diisi.');
+        return false;
+      }
+      if (_birthDateController.text.isEmpty) {
+        _showError('Tanggal lahir wajib diisi.');
+        return false;
+      }
+      if (_gender.isEmpty) {
+        _showError('Pilih jenis kelamin.');
+        return false;
+      }
+    } else if (_currentIndex == 2) {
+      // Step 3: Alamat
+      if (_addressController.text.isEmpty) {
+        _showError('Alamat rumah wajib diisi.');
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(backgroundColor: Colors.red, content: Text(msg)));
+  }
+
   void _nextPage() async {
-    // Ubah jadi async
     if (_currentIndex < 3) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      if (_validateCurrentStep()) {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
     } else {
-      // === LOGIC REGISTER ===
-
-      // Tampilkan Loading (bisa pakai dialog atau state button)
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (c) => const Center(child: CircularProgressIndicator()),
-      );
-
+      setState(() => _isLoading = true);
       try {
-        // Panggil Service
         await AuthService().signUp(
-          email: "email_dari_input@gmail.com", // Ambil dari controller email
-          password: "password123", // Ambil dari controller password
+          email: _emailController.text,
+          password: _passwordController.text,
           firstName: _firstNameController.text,
           lastName: _lastNameController.text,
           phone: _phoneController.text,
@@ -78,43 +120,32 @@ class _RegisterPageState extends State<RegisterPage> {
           district: _districtController.text,
           subDistrict: _subDistrictController.text,
           zipCode: _zipCodeController.text,
+          gender: _gender,
+          birthDate: _birthDateController.text,
         );
 
-        Navigator.pop(context); // Tutup loading dialog
-
-        // Tampilkan Sukses
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Colors.green,
-            content: Text('Registrasi Berhasil! Silakan Login.'),
-          ),
-        );
-
-        // Arahkan ke Login atau Main Menu
-        Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
-      } on FirebaseAuthException catch (e) {
-        Navigator.pop(context); // Tutup loading dialog
-        String message = '';
-        if (e.code == 'weak-password') {
-          message = 'Password terlalu lemah.';
-        } else if (e.code == 'email-already-in-use') {
-          message = 'Email sudah terdaftar.';
-        } else {
-          message = 'Gagal daftar: ${e.message}';
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.green,
+              content: Text('Registrasi Berhasil!'),
+            ),
+          );
+          Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(backgroundColor: Colors.red, content: Text(message)),
-        );
+      } on FirebaseAuthException catch (e) {
+        String msg = e.message ?? 'Gagal mendaftar.';
+        if (e.code == 'email-already-in-use') msg = 'Email sudah terdaftar.';
+        if (e.code == 'weak-password') msg = 'Password terlalu lemah.';
+        _showError(msg);
       } catch (e) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(backgroundColor: Colors.red, content: Text('Error: $e')),
-        );
+        _showError('Terjadi kesalahan: $e');
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
       }
     }
   }
 
-  // Fungsi tombol Back (kiri atas)
   void _prevPage() {
     if (_currentIndex > 0) {
       _pageController.previousPage(
@@ -126,59 +157,73 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2000),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(
+            context,
+          ).copyWith(colorScheme: ColorScheme.light(primary: kPrimaryColor)),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        _birthDateController.text = DateFormat(
+          'dd MMMM yyyy',
+          'id_ID',
+        ).format(picked);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Menghitung progress: 0->0.25, 1->0.50, dst
     double progressValue = (_currentIndex + 1) / 4;
 
     return Scaffold(
-      backgroundColor: kWhiteColor, // Pastikan kWhiteColor ada di theme.dart
+      backgroundColor: kWhiteColor,
       body: SafeArea(
         child: Column(
           children: [
-            // --- HEADER (Tombol Back, Judul, Progress) ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Back Button
                   GestureDetector(
                     onTap: _prevPage,
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(
-                          0xFFF1F4FF,
-                        ), // Warna light blue background
+                        color: const Color(0xFFF1F4FF),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
                         Icons.arrow_back_ios_new,
-                        size: 15,
+                        size: 16,
                         color: Colors.blue,
                       ),
                     ),
                   ),
-
-                  // Title
                   Text(
                     'Daftar Akun',
                     style: primaryTextStyle.copyWith(
-                      // Dari theme.dart
-                      fontSize: 21,
+                      fontSize: 18,
                       fontWeight: bold,
                     ),
                   ),
-
-                  // Progress Indicator Custom
                   SizedBox(
                     width: 40,
                     height: 40,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        // Lingkaran Progress
                         CircularProgressIndicator(
                           value: _currentIndex == 3 ? 1.0 : progressValue,
                           strokeWidth: 4,
@@ -189,7 +234,6 @@ class _RegisterPageState extends State<RegisterPage> {
                                 : const Color(0xFF5364F3),
                           ),
                         ),
-                        // Text Persen atau Icon Centang
                         Center(
                           child: _currentIndex == 3
                               ? const Icon(
@@ -213,34 +257,28 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
 
-            // --- FORM CONTENT (PageView) ---
             Expanded(
               child: PageView(
                 controller: _pageController,
-                physics:
-                    const NeverScrollableScrollPhysics(), // User gak bisa swipe manual, harus klik tombol
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
+                physics: const NeverScrollableScrollPhysics(),
+                onPageChanged: (index) => setState(() => _currentIndex = index),
                 children: [
-                  _buildStep1Phone(),
-                  _buildStep2Name(),
+                  _buildStep1Account(),
+                  _buildStep2Personal(),
                   _buildStep3Address(),
                   _buildStep4Summary(),
                 ],
               ),
             ),
 
-            // --- BOTTOM BUTTON ---
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
               child: CustomButton(
                 text: _currentIndex == 3 ? 'Daftar Sekarang' : 'Lanjutkan',
+                isLoading: _isLoading,
                 onPressed: _nextPage,
-                size: Size(double.infinity, 54),
-                color: const Color(0xFF2C40F0), // Warna biru sesuai gambar
+                size: const Size(double.infinity, 54),
+                color: const Color(0xFF2C40F0),
               ),
             ),
           ],
@@ -249,23 +287,38 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // --- HALAMAN 1: NOMOR TELEPON ---
-  Widget _buildStep1Phone() {
+  // --- STEP 1: AKUN (Email, Pass, Telp) ---
+  Widget _buildStep1Account() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Nomor Telepon',
+            'Informasi Akun',
             style: blackTextStyle.copyWith(fontSize: 20, fontWeight: bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Masukkan nomor telepon yang berlaku untuk menerima notifikasi pemesanan Anda.',
+            'Data ini digunakan untuk masuk ke aplikasi.',
             style: greyTextStyle.copyWith(fontSize: 14),
           ),
           const SizedBox(height: 30),
+          _buildLabel('Email Address'),
+          _buildCustomTextField(
+            controller: _emailController,
+            hint: 'nama@email.com',
+            inputType: TextInputType.emailAddress,
+          ),
+          const SizedBox(height: 16),
+          _buildLabel('Password'),
+          _buildCustomTextField(
+            controller: _passwordController,
+            hint: '••••••••',
+            isObscure: true,
+          ),
+          const SizedBox(height: 16),
+          _buildLabel('Nomor Telepon'),
           _buildCustomTextField(
             controller: _phoneController,
             hint: '+62812345678',
@@ -276,40 +329,149 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // --- HALAMAN 2: NAMA LENGKAP ---
-  Widget _buildStep2Name() {
+  // --- STEP 2: DATA DIRI (Nama, Tgl Lahir, Gender) ---
+  Widget _buildStep2Personal() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Nama Lengkap',
+            'Data Diri',
             style: blackTextStyle.copyWith(fontSize: 20, fontWeight: bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Isi formulir di bawah sesuai dengan nama lengkap Anda.',
+            'Lengkapi identitas diri Anda.',
             style: greyTextStyle.copyWith(fontSize: 14),
           ),
           const SizedBox(height: 30),
+
           _buildLabel('Nama Depan'),
           _buildCustomTextField(
             controller: _firstNameController,
             hint: 'Contoh: Ucup',
           ),
           const SizedBox(height: 16),
+
           _buildLabel('Nama Belakang'),
           _buildCustomTextField(
             controller: _lastNameController,
             hint: 'Contoh: Markucup',
+          ),
+          const SizedBox(height: 16),
+
+          // TANGGAL LAHIR (POP UP)
+          _buildLabel('Tanggal Lahir'),
+          GestureDetector(
+            onTap: () => _selectDate(context),
+            child: AbsorbPointer(
+              // Mencegah keyboard muncul
+              child: _buildCustomTextField(
+                controller: _birthDateController,
+                hint: 'Pilih Tanggal',
+                icon: Icons.calendar_today,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // GENDER SELECTION
+          _buildLabel('Jenis Kelamin'),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              // CARD PRIA (BIRU)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _gender = 'Pria'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: _gender == 'Pria'
+                          ? Colors.blue.withOpacity(0.1)
+                          : const Color(0xFFEDEEF5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _gender == 'Pria'
+                            ? Colors.blue
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.male,
+                          color: _gender == 'Pria' ? Colors.blue : Colors.grey,
+                          size: 40,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Pria',
+                          style: blackTextStyle.copyWith(
+                            fontWeight: semiBold,
+                            color: _gender == 'Pria'
+                                ? Colors.blue
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // CARD WANITA (PINK)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => setState(() => _gender = 'Wanita'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: _gender == 'Wanita'
+                          ? Colors.pink.withOpacity(0.1)
+                          : const Color(0xFFEDEEF5),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _gender == 'Wanita'
+                            ? Colors.pink
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.female,
+                          color: _gender == 'Wanita'
+                              ? Colors.pink
+                              : Colors.grey,
+                          size: 40,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Wanita',
+                          style: blackTextStyle.copyWith(
+                            fontWeight: semiBold,
+                            color: _gender == 'Wanita'
+                                ? Colors.pink
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  // --- HALAMAN 3: ALAMAT LENGKAP ---
+  // --- STEP 3: ALAMAT (Sama seperti sebelumnya) ---
   Widget _buildStep3Address() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -322,47 +484,65 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Masukkan alamat tempat tinggal Anda agar pesanan sampai sesuai tujuan.',
+            'Masukkan alamat pengiriman Anda.',
             style: greyTextStyle.copyWith(fontSize: 14),
           ),
           const SizedBox(height: 30),
           _buildLabel('Alamat Rumah'),
           _buildCustomTextField(
             controller: _addressController,
-            hint: 'Contoh: Jl. Sunny Ville No.5',
+            hint: 'Jl. Mawar No. 1',
           ),
           const SizedBox(height: 16),
           _buildLabel('Kota'),
           _buildCustomTextField(
             controller: _cityController,
-            hint: 'Contoh: Tangerang Selatan',
+            hint: 'Jakarta Selatan',
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildLabel('Kecamatan'),
+                    _buildCustomTextField(
+                      controller: _subDistrictController,
+                      hint: 'Tebet',
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildLabel('Kode Pos'),
+                    _buildCustomTextField(
+                      controller: _zipCodeController,
+                      hint: '12810',
+                      inputType: TextInputType.number,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           _buildLabel('Kelurahan'),
           _buildCustomTextField(
             controller: _districtController,
-            hint: 'Contoh: Buaran',
+            hint: 'Tebet Barat',
           ),
-          const SizedBox(height: 16),
-          _buildLabel('Kecamatan'),
-          _buildCustomTextField(
-            controller: _subDistrictController,
-            hint: 'Contoh: Serpong Utara',
-          ),
-          const SizedBox(height: 16),
-          _buildLabel('Kode Pos'),
-          _buildCustomTextField(
-            controller: _zipCodeController,
-            hint: 'Contoh: 15322',
-            inputType: TextInputType.number,
-          ),
-          const SizedBox(height: 20), // Extra space for scroll
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  // --- HALAMAN 4: RINGKASAN AKUN ---
+  // --- STEP 4: SUMMARY (Update dengan Data Baru) ---
   Widget _buildStep4Summary() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -373,33 +553,23 @@ class _RegisterPageState extends State<RegisterPage> {
             'Ringkasan Akun',
             style: blackTextStyle.copyWith(fontSize: 20, fontWeight: bold),
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Pastikan data yang tertera sesuai dengan data diri pribadi Anda',
-            style: greyTextStyle.copyWith(fontSize: 14),
-          ),
           const SizedBox(height: 30),
-
-          // Kartu Nama
-          _buildSummaryCard(
-            label: 'Nama Lengkap',
-            value: '${_firstNameController.text} ${_lastNameController.text}',
+          _buildSummaryItem('Email', _emailController.text),
+          _buildSummaryItem(
+            'Nama',
+            '${_firstNameController.text} ${_lastNameController.text}',
+          ),
+          _buildSummaryItem('Telepon', _phoneController.text),
+          _buildSummaryItem(
+            'Tgl Lahir / Gender',
+            '${_birthDateController.text} (${_gender})',
           ),
           const SizedBox(height: 16),
-
-          // Kartu Telepon
-          _buildSummaryCard(
-            label: 'Nomor Telepon',
-            value: _phoneController.text,
-          ),
-          const SizedBox(height: 16),
-
-          // Kartu Alamat (Multi-line)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFF2C40F0)), // Blue Border
+              border: Border.all(color: const Color(0xFF2C40F0)),
               borderRadius: BorderRadius.circular(12),
               color: kWhiteColor,
             ),
@@ -414,7 +584,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 Text(
                   '${_addressController.text}, ${_districtController.text}, ${_subDistrictController.text}\n${_cityController.text} ${_zipCodeController.text}',
                   style: blackTextStyle.copyWith(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: bold,
                   ),
                 ),
@@ -426,8 +596,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // --- WIDGET HELPERS ---
-
+  // --- WIDGET HELPER ---
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, left: 4),
@@ -438,20 +607,43 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Text Field dengan style background abu-abu seperti gambar 1-3
+  Widget _buildSummaryItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: greyTextStyle),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: blackTextStyle.copyWith(fontWeight: semiBold),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCustomTextField({
     required TextEditingController controller,
     required String hint,
     TextInputType inputType = TextInputType.text,
+    bool isObscure = false,
+    IconData? icon,
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFEDEEF5), // Light gray background
+        color: const Color(0xFFEDEEF5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
         keyboardType: inputType,
+        obscureText: isObscure,
         style: blackTextStyle.copyWith(fontWeight: semiBold),
         decoration: InputDecoration(
           hintText: hint,
@@ -461,31 +653,8 @@ class _RegisterPageState extends State<RegisterPage> {
             horizontal: 20,
             vertical: 16,
           ),
+          suffixIcon: icon != null ? Icon(icon, color: kGreyColor) : null,
         ),
-      ),
-    );
-  }
-
-  // Card Ringkasan dengan border biru (Halaman 4)
-  Widget _buildSummaryCard({required String label, required String value}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFF2C40F0)), // Blue Border
-        borderRadius: BorderRadius.circular(12),
-        color: kWhiteColor,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: greyTextStyle.copyWith(fontSize: 12)),
-          const SizedBox(height: 4),
-          Text(
-            value.isEmpty ? '-' : value, // Handle empty state
-            style: blackTextStyle.copyWith(fontSize: 16, fontWeight: bold),
-          ),
-        ],
       ),
     );
   }

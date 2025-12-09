@@ -17,16 +17,15 @@ class AuthService {
     required String district,
     required String subDistrict,
     required String zipCode,
+    required String gender,
+    required String birthDate,
   }) async {
     try {
-      // 1. Buat akun di Auth
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
 
       User? user = userCredential.user;
 
-      // 2. Simpan data detail ke Firestore
-      // Kita pakai Map manual di sini supaya cepat, tidak perlu instansiasi UserModel dulu
       await _firestore.collection('users').doc(user!.uid).set({
         'uid': user.uid,
         'email': email,
@@ -43,8 +42,9 @@ class AuthService {
         'createdAt': FieldValue.serverTimestamp(),
         'username': firstName.toLowerCase().replaceAll(' ', '') + '123',
         'bio': 'Pengguna baru',
-        'gender': '-',
-        'birthDate': '-',
+        // Simpan Data Baru
+        'gender': gender,
+        'birthDate': birthDate,
       });
 
       return userCredential;
