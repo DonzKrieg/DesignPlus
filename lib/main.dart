@@ -8,9 +8,17 @@ import 'package:designplus/pages/onboarding_page.dart';
 import 'package:designplus/pages/product_page.dart';
 import 'package:designplus/pages/profile_page.dart';
 import 'package:designplus/pages/splash_page.dart';
+import 'package:designplus/pages/register_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+<<<<<<< HEAD
 void main() {
+=======
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+>>>>>>> 4067baf82cbcdc7148a4cf0806d301227add6ea0
   runApp(const MyApp());
 }
 
@@ -22,7 +30,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       routes: {
-        '/': (context) => SplashPage(),
+        '/': (context) => LoginPage(),
         '/onboarding': (context) => OnboardingPage(),
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),

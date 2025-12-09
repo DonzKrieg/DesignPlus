@@ -1,3 +1,5 @@
+import 'package:designplus/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:designplus/shared/theme.dart';
 import 'package:designplus/widgets/custom_button.dart';
@@ -14,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passCtrl = TextEditingController();
   bool _remember = false;
   bool _obscure = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -55,7 +58,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
@@ -82,8 +84,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 28),
-
-                  // Username
                   Text(
                     'Username',
                     style: blackTextStyle.copyWith(
@@ -110,7 +110,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 18),
-
                   Text(
                     'Password',
                     style: blackTextStyle.copyWith(
@@ -145,7 +144,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-
                   Row(
                     children: [
                       GestureDetector(
@@ -182,20 +180,77 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 24),
-
                   CustomButton(
                     text: 'Masuk',
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/main');
+                    isLoading:
+                        _isLoading, // Asumsi CustomButton support loading, jika tidak, pakai Stack/Indicator
+                    onPressed: () async {
+                      // Validasi input kosong
+                      if (_userCtrl.text.isEmpty || _passCtrl.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: Colors.red,
+                            content: Text('Email dan Password harus diisi!'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      setState(() => _isLoading = true); // Mulai loading
+
+                      try {
+                        // Panggil Auth Service (Gunakan email controller sbg username/email)
+                        // Pastikan _userCtrl inputnya adalah Email format, atau tambahkan logic handling
+                        await AuthService().signIn(
+                          email: _userCtrl.text,
+                          password: _passCtrl.text,
+                        );
+
+                        // Jika sukses, redirect
+                        if (mounted) {
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/main',
+                            (route) => false,
+                          );
+                        }
+                      } on FirebaseAuthException catch (e) {
+                        String message = '';
+                        if (e.code == 'user-not-found') {
+                          message = 'Pengguna tidak ditemukan.';
+                        } else if (e.code == 'wrong-password') {
+                          message = 'Password salah.';
+                        } else {
+                          message = 'Terjadi kesalahan: ${e.message}';
+                        }
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: Colors.red,
+                              content: Text(message),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              backgroundColor: Colors.red,
+                              content: Text('Gagal masuk: $e'),
+                            ),
+                          );
+                        }
+                      } finally {
+                        if (mounted)
+                          setState(() => _isLoading = false); // Stop loading
+                      }
                     },
                     size: Size(screenW, 54),
                     color: kPrimaryColor,
                   ),
-
                   const SizedBox(height: 21),
-
                   Row(
                     children: [
                       Expanded(
@@ -210,9 +265,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 25),
-
                   InkWell(
                     onTap: () {},
                     borderRadius: BorderRadius.circular(12),
@@ -254,23 +307,28 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 28),
-
                   Center(
-                    child: RichText(
-                      text: TextSpan(
-                        text: 'Belum punya akun? ',
-                        style: greyTextStyle,
-                        children: [
-                          TextSpan(
-                            text: 'Daftar di sini',
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Belum punya akun? ',
+                          style: greyTextStyle.copyWith(fontSize: 14),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/register');
+                          },
+                          child: Text(
+                            'Daftar',
                             style: primaryTextStyle.copyWith(
+                              fontSize: 14,
                               fontWeight: semiBold,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 140),
