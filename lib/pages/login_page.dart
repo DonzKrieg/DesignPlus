@@ -12,7 +12,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _userCtrl = TextEditingController();
+  final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passCtrl = TextEditingController();
   bool _remember = false;
   bool _obscure = true;
@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _userCtrl.dispose();
+    _emailCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
@@ -85,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 28),
                   Text(
-                    'Username',
+                    'Email Address',
                     style: blackTextStyle.copyWith(
                       fontSize: 16,
                       fontWeight: semiBold,
@@ -93,9 +93,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 8),
                   TextField(
-                    controller: _userCtrl,
+                    controller: _emailCtrl,
                     decoration: InputDecoration(
-                      hintText: 'John Doe',
+                      hintText: 'nama@email.com',
                       hintStyle: greyTextStyle.copyWith(fontWeight: semiBold),
                       filled: true,
                       fillColor: kSecondaryColor.withOpacity(0.18),
@@ -183,11 +183,10 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 24),
                   CustomButton(
                     text: 'Masuk',
-                    isLoading:
-                        _isLoading, // Asumsi CustomButton support loading, jika tidak, pakai Stack/Indicator
+                    isLoading: _isLoading,
                     onPressed: () async {
                       // Validasi input kosong
-                      if (_userCtrl.text.isEmpty || _passCtrl.text.isEmpty) {
+                      if (_emailCtrl.text.isEmpty || _passCtrl.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             backgroundColor: Colors.red,
@@ -197,13 +196,11 @@ class _LoginPageState extends State<LoginPage> {
                         return;
                       }
 
-                      setState(() => _isLoading = true); // Mulai loading
+                      setState(() => _isLoading = true);
 
                       try {
-                        // Panggil Auth Service (Gunakan email controller sbg username/email)
-                        // Pastikan _userCtrl inputnya adalah Email format, atau tambahkan logic handling
                         await AuthService().signIn(
-                          email: _userCtrl.text,
+                          email: _emailCtrl.text,
                           password: _passCtrl.text,
                         );
 
@@ -216,35 +213,28 @@ class _LoginPageState extends State<LoginPage> {
                           );
                         }
                       } on FirebaseAuthException catch (e) {
-                        String message = '';
-                        if (e.code == 'user-not-found') {
-                          message = 'Pengguna tidak ditemukan.';
-                        } else if (e.code == 'wrong-password') {
-                          message = 'Password salah.';
-                        } else {
-                          message = 'Terjadi kesalahan: ${e.message}';
-                        }
+                        String msg = 'Terjadi kesalahan login.';
+                        if (e.code == 'user-not-found')
+                          msg = 'Email tidak terdaftar.';
+                        if (e.code == 'wrong-password') msg = 'Password salah.';
+                        if (e.code == 'invalid-email')
+                          msg = 'Format email salah.';
 
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: Colors.red,
-                              content: Text(message),
-                            ),
-                          );
-                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: Colors.red,
+                            content: Text(msg),
+                          ),
+                        );
                       } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: Colors.red,
-                              content: Text('Gagal masuk: $e'),
-                            ),
-                          );
-                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: Colors.red,
+                            content: Text('Error: $e'),
+                          ),
+                        );
                       } finally {
-                        if (mounted)
-                          setState(() => _isLoading = false); // Stop loading
+                        if (mounted) setState(() => _isLoading = false);
                       }
                     },
                     size: Size(screenW, 54),
