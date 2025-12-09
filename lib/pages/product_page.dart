@@ -197,8 +197,6 @@ class _ProductPageState extends State<ProductPage> {
               onPressed: () {
                 setState(() {
                   _selectedCategory = filters[index];
-                  // SetState akan memicu rebuild, dan StreamBuilder
-                  // akan menjalankan logika filternya lagi.
                 });
               },
             ),
@@ -209,7 +207,6 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   // = = = GRID PRODUK = = =
-  // Sekarang menerima parameter List<Product> hasil filter
   Widget buildProductGrid(List<Product> products) {
     return GridView.builder(
       padding: EdgeInsets.all(16),
@@ -236,7 +233,6 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigasi ke detail page (pastikan ProductDetailPage menerima parameter product jika perlu)
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => ProductDetailPage()),
@@ -257,7 +253,6 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // = = = IMAGE HANDLER = = =
             ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
               child: _buildImage(product.imageUrl),
@@ -340,9 +335,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  // Helper untuk menentukan apakah gambar dari Network atau Asset
   Widget _buildImage(String url) {
-    // Jika URL dimulai dengan http/https, load dari internet
     if (url.startsWith('http')) {
       return Image.network(
         url,
@@ -350,7 +343,6 @@ class ProductCard extends StatelessWidget {
         width: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          // Placeholder jika gambar gagal dimuat
           return Container(
             height: 150,
             color: Colors.grey[300],
@@ -367,7 +359,6 @@ class ProductCard extends StatelessWidget {
         },
       );
     }
-    // Jika tidak, asumsikan asset lokal
     return Image.asset(
       url,
       height: 150,
