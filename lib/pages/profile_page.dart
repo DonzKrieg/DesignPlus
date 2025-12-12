@@ -41,20 +41,16 @@ class _ProfilePageState extends State<ProfilePage> {
     fetchUserData();
   }
 
-  // 2. Fungsi Ambil Data dari Firestore
   Future<void> fetchUserData() async {
     if (currentUser == null) return;
 
     try {
-      // Di sini Anda memberi nama variabel 'userDoc'
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser!.uid)
           .get();
 
-      // PERBAIKAN: Gunakan 'userDoc', bukan 'doc'
       if (userDoc.exists) {
-        // PERBAIKAN: Gunakan 'userDoc' di sini juga
         UserModel user = UserModel.fromJson(
           userDoc.id,
           userDoc.data() as Map<String, dynamic>,
@@ -78,7 +74,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // 3. Fungsi Update Data ke Firestore (Dipanggil setelah edit)
   Future<void> updateFirestoreData(String field, String value) async {
     if (currentUser == null) return;
     try {
@@ -87,10 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
           .doc(currentUser!.uid)
           .update({field: value});
 
-      // Jika field nama, update juga fullName untuk konsistensi
-      if (field == 'firstName' || field == 'lastName') {
-        // Logic tambahan jika diperlukan
-      }
+      if (field == 'firstName' || field == 'lastName') {}
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -194,7 +186,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   Text(name, style: nameStyle),
                   Text('@$username', style: usernameStyle),
                   SizedBox(height: 16),
-                  Text(bio, style: bioStyle),
+                  Text(
+                    bio,
+                    style: bioStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
@@ -386,9 +383,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 );
                 if (result != null) {
-                  // Update UI Lokal
                   setState(() => name = result);
-                  // Update ke Firestore (misal kita simpan ke field 'fullName')
                   updateFirestoreData('fullName', result);
                   showSuccessSnackBar();
                 }
@@ -413,7 +408,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
                 if (result != null) {
                   setState(() => username = result);
-                  updateFirestoreData('username', result); // Update Firestore
+                  updateFirestoreData('username', result);
                   showSuccessSnackBar();
                 }
               },
@@ -436,7 +431,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
                 if (result != null) {
                   setState(() => bio = result);
-                  updateFirestoreData('bio', result); // Update Firestore
+                  updateFirestoreData('bio', result);
                   showSuccessSnackBar();
                 }
               },
@@ -502,7 +497,6 @@ class _ProfilePageState extends State<ProfilePage> {
             await FirebaseAuth.instance.signOut();
 
             if (mounted) {
-              // Kembali ke Login dan hapus semua stack navigasi
               Navigator.of(
                 context,
               ).pushNamedAndRemoveUntil('/login', (route) => false);
@@ -539,19 +533,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: pageBg,
-      // Gunakan Loading Indicator jika data belum siap
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: kPrimaryColor))
           : ListView(
               padding: EdgeInsets.only(bottom: 105),
               children: [
-                header(), // Pastikan di header() variabel 'name' & 'username' dipanggil
+                header(),
                 SizedBox(height: 5),
                 orderStatus(),
                 SizedBox(height: 5),
                 profileInfo(),
                 SizedBox(height: 5),
-                personalInfo(), // Pastikan personalInfo() memanggil var 'address', 'phone', dll
+                personalInfo(),
                 SizedBox(height: 5),
                 logoutButton(),
               ],

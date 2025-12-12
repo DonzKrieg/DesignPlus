@@ -42,7 +42,6 @@ class AuthService {
         'createdAt': FieldValue.serverTimestamp(),
         'username': firstName.toLowerCase().replaceAll(' ', '') + '123',
         'bio': 'Pengguna baru',
-        // Simpan Data Baru
         'gender': gender,
         'birthDate': birthDate,
       });
