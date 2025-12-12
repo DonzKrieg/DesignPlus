@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:designplus/shared/theme.dart';
 import 'package:designplus/widgets/custom_button.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:designplus/services/auth_service.dart';
 
@@ -158,6 +159,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    // 1. Tampilkan Kalender
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime(2000),
@@ -172,12 +174,22 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       },
     );
+
     if (picked != null) {
+      String formattedDate;
+
+      try {
+        await initializeDateFormatting('id_ID', null);
+        formattedDate = DateFormat('dd MMMM yyyy', 'id_ID').format(picked);
+      } catch (e) {
+        print("Gagal format Indo, pakai default: $e");
+        formattedDate = DateFormat('dd-MM-yyyy').format(picked);
+      }
+
       setState(() {
-        _birthDateController.text = DateFormat(
-          'dd MMMM yyyy',
-          'id_ID',
-        ).format(picked);
+        _birthDateController.text = formattedDate;
+
+        print("Tanggal dipilih: ${_birthDateController.text}");
       });
     }
   }
@@ -287,7 +299,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // --- STEP 1: AKUN (Email, Pass, Telp) ---
   Widget _buildStep1Account() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -329,7 +340,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // --- STEP 2: DATA DIRI (Nama, Tgl Lahir, Gender) ---
   Widget _buildStep2Personal() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -360,28 +370,34 @@ class _RegisterPageState extends State<RegisterPage> {
             hint: 'Contoh: Markucup',
           ),
           const SizedBox(height: 16),
-
-          // TANGGAL LAHIR (POP UP)
           _buildLabel('Tanggal Lahir'),
-          GestureDetector(
-            onTap: () => _selectDate(context),
-            child: AbsorbPointer(
-              // Mencegah keyboard muncul
-              child: _buildCustomTextField(
-                controller: _birthDateController,
-                hint: 'Pilih Tanggal',
-                icon: Icons.calendar_today,
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFEDEEF5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextField(
+              controller: _birthDateController,
+              readOnly: true,
+              onTap: () => _selectDate(context),
+              style: blackTextStyle.copyWith(fontWeight: semiBold),
+              decoration: InputDecoration(
+                hintText: 'Pilih Tanggal',
+                hintStyle: greyTextStyle.copyWith(fontSize: 14),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                suffixIcon: Icon(Icons.calendar_today, color: kGreyColor),
               ),
             ),
           ),
           const SizedBox(height: 16),
-
-          // GENDER SELECTION
           _buildLabel('Jenis Kelamin'),
           const SizedBox(height: 8),
           Row(
             children: [
-              // CARD PRIA (BIRU)
               Expanded(
                 child: GestureDetector(
                   onTap: () => setState(() => _gender = 'Pria'),
@@ -422,7 +438,6 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
               const SizedBox(width: 16),
-              // CARD WANITA (PINK)
               Expanded(
                 child: GestureDetector(
                   onTap: () => setState(() => _gender = 'Wanita'),
@@ -471,7 +486,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // --- STEP 3: ALAMAT (Sama seperti sebelumnya) ---
   Widget _buildStep3Address() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -542,7 +556,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // --- STEP 4: SUMMARY (Update dengan Data Baru) ---
   Widget _buildStep4Summary() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -596,7 +609,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // --- WIDGET HELPER ---
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, left: 4),

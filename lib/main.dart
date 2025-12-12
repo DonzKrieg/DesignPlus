@@ -11,14 +11,12 @@ import 'package:designplus/pages/splash_page.dart';
 import 'package:designplus/pages/register_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-<<<<<<< HEAD
-void main() {
-=======
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
->>>>>>> 4067baf82cbcdc7148a4cf0806d301227add6ea0
+  await initializeDateFormatting('id_ID', null);
   runApp(const MyApp());
 }
 
